@@ -59,7 +59,7 @@
 
 #define BYTES_DECIMAL_FORMAT    0
 #define BYTES_HEX_FORMAT        1
-
+`
 #define BYTES_EIGHT_BIT_ASCII   0
 #define BYTES_UNICODE           1
 
@@ -355,7 +355,7 @@ unsigned long Compute32BitCRC( char* filePath, long long fileSz)
         if (!g_is32BitCRCTableComputed)
             Make32BitCRCTable();
 
-        printf("\n  Size of file to split: %lld\n", fileSz);
+        printf("\n  File size: %lld\n", fileSz);
 
         // Allocate memory for the temp buffer
         ptr = new char[fileSz < (long long)maxBlockSz ? fileSz : maxBlockSz];

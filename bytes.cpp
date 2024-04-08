@@ -59,7 +59,7 @@
 
 #define BYTES_DECIMAL_FORMAT    0
 #define BYTES_HEX_FORMAT        1
-`
+
 #define BYTES_EIGHT_BIT_ASCII   0
 #define BYTES_UNICODE           1
 
@@ -346,8 +346,8 @@ unsigned long Compute32BitCRC( char* filePath, long long fileSz)
     long long bytesRemaining;
     //int flDescIn = 0;
     errno = 0;
-    char* ptr;
-    char* buff;
+    unsigned char* ptr;
+    unsigned char* buff;
     ifstream inFile;
 
     try
@@ -358,10 +358,7 @@ unsigned long Compute32BitCRC( char* filePath, long long fileSz)
         printf("\n  File size: %lld\n", fileSz);
 
         // Allocate memory for the temp buffer
-        ptr = new char[fileSz < (long long)maxBlockSz ? fileSz : maxBlockSz];
-
-        // Must run CRC computation below on unsigned integral type so convert pointer
-        // from char (signed) to unsigned char here.
+        ptr = new unsigned char[fileSz < (long long)maxBlockSz ? fileSz : maxBlockSz];
         buff = ptr;
 
         inFile.open(filePath, ios::in | ios::binary);
@@ -376,16 +373,17 @@ unsigned long Compute32BitCRC( char* filePath, long long fileSz)
         while (bytesRemaining > 0)
         {
             // Get block size or num left, read from infile, write to outfile
-            bytesToRead     = (unsigned long) (bytesRemaining < maxBlockSz ? bytesRemaining : maxBlockSz);
-            inFile.read(buff, bytesToRead);
+            bytesToRead = (unsigned long) (bytesRemaining < maxBlockSz ? bytesRemaining : maxBlockSz);
+            inFile.read(reinterpret_cast<char*>(buff), bytesToRead);
             bytesRead = inFile.gcount();
             bytesRemaining  -= bytesRead;
             //printf("    Copied %ld bytes to memory buffer, bytes remaining in this file: %lld\n", bytesRead, bytesRemaining);
             printf(".");
 
             // Perform the CRC algorithm on each character in the string, using the lookup table values.
-            for (unsigned long i = 0; i < bytesRead; ++i)
+            for (unsigned long i = 0; i < bytesRead; ++i) {
                 ulCRC = (ulCRC >> 8) ^ g_crc32Table[(ulCRC & 0xFF) ^ buff[i]];
+            }
         }
 
         // Exclusive OR the result with the beginning value.
